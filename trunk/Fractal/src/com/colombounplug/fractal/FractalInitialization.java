@@ -4,6 +4,7 @@
 package com.colombounplug.fractal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
@@ -23,9 +24,69 @@ public class FractalInitialization {
 	 * Default constructor sets the threshold.
 	 */
 	public FractalInitialization () {
+		
 		Random random = new Random();
 		this.distanceThreshold = random.nextInt(5);
 		System.out.println("threshold " + this.distanceThreshold);
+	}
+	
+	/**
+	 * Method to generate initial clusters.
+	 * @param start value of the starting point.
+	 * @param end value of the ending point.
+	 * @return an array with double values.
+	 */
+	public double[] generateClusters(int start, int end) {
+		
+		Random random =  new Random();
+		double range =  (double)end - (double)start +1;
+		double [] initialCluster = new double[10];
+		for (int i = 0; i < initialCluster.length; i++) {
+			initialCluster[i] = range * random.nextDouble();
+			log("first cluster " + initialCluster[i]);
+		}
+		return initialCluster;
+	}
+	
+	/**
+	 * Method to combine the test clusters.
+	 * @param first
+	 * @param second
+	 * @return
+	 */
+	public double[] combineArrays(double[] first, double[] second) {
+		
+		int totalLenth = first.length + second.length;
+		double[] newDoubles = new double[totalLenth];
+		for (int i = 0; i < first.length; i++) {
+			newDoubles[i] = first[i];
+		}
+		
+		for (int i = 0; i < second.length; i++) {
+			newDoubles[i] = second[i];
+		}
+		return newDoubles;
+	}
+	
+	/**
+	 * Combine any type/number of arrays to a one arrays.
+	 * @param <T>
+	 * @param first
+	 * @param rest
+	 * @return
+	 */
+	public static <T> T[] concatArrays (T[] first, T[]... rest) {
+		
+		int fullLength = first.length;
+		for (T[] array : rest)
+			fullLength += array.length;
+		T[] finalArray = Arrays.copyOf(first, fullLength);
+		int offSet = first.length;
+		for (T[] array : rest) {
+			System.arraycopy(array, 0, finalArray, offSet, array.length);
+			offSet += array.length;
+		}
+		return  finalArray;
 	}
 	
 	/**
@@ -143,9 +204,18 @@ public class FractalInitialization {
 		this.numOfClusters = numClusters;
 	}
 	
+	/**
+	 * just simple printing method.
+	 */
+	private static void log(String aMessage) {
+		System.out.println(aMessage);
+	}
+	
 	public static void main (String[] args) {
 		FractalInitialization fractInt = new FractalInitialization();
 		fractInt.isBelongToCluster();
+		
+
 	}	
 
 }
