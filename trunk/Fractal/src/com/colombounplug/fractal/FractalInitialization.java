@@ -40,7 +40,7 @@ public class FractalInitialization {
 		
 		Random random =  new Random();
 		double range =  (double)end - (double)start +1;
-		double [] initialCluster = new double[10];
+		double [] initialCluster = new double[50];
 		for (int i = 0; i < initialCluster.length; i++) {
 			initialCluster[i] = range * random.nextDouble();
 			log("first cluster " + initialCluster[i]);
@@ -100,7 +100,7 @@ public class FractalInitialization {
 		int[] x = new int[100];
 		for (int i=0; i<x.length; i++)
 		{
-			x[i] = (randNumGenerator.nextInt(100)+1);
+			x[i] = (randNumGenerator.nextInt(1000)+1);
 			stack.push(x[i]);
 			//System.out.println(x[i]);
 		}
@@ -131,6 +131,8 @@ public class FractalInitialization {
 	 * threshold.
 	 */
 	public void isBelongToCluster() {
+		
+		double[] bigCluster = combineArrays(generateClusters(1, 25), generateClusters(500, 625));
 		
 		LinkedList<Integer> tempList = new LinkedList<Integer>();
 		ArrayList<Integer> cluster = new ArrayList<Integer>();
@@ -213,8 +215,15 @@ public class FractalInitialization {
 	
 	public static void main (String[] args) {
 		FractalInitialization fractInt = new FractalInitialization();
-		fractInt.isBelongToCluster();
-		
+		//fractInt.isBelongToCluster();
+		double[] bigCluster = new double[50];
+		double[] cluster1 = fractInt.generateClusters(1, 24);
+		double[] cluster2 = fractInt.generateClusters(100, 225);
+		bigCluster = fractInt.combineArrays(cluster1, cluster2);
+		for (int i = 0; i < bigCluster.length; i++) {
+			fractInt.log("Whats in array" + bigCluster[i]);
+		}
+		System.out.println(bigCluster.length);
 
 	}	
 
