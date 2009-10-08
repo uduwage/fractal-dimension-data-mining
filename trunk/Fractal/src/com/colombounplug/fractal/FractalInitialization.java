@@ -43,7 +43,7 @@ public class FractalInitialization {
 		double [] initialCluster = new double[50];
 		for (int i = 0; i < initialCluster.length; i++) {
 			initialCluster[i] = range * random.nextDouble();
-			log("first cluster " + initialCluster[i]);
+			//log("first cluster " + initialCluster[i]);
 		}
 		return initialCluster;
 	}
@@ -93,16 +93,15 @@ public class FractalInitialization {
 	 * Initial stage we generate random number to replicate the points.
 	 * @return returns stack with random integers.
 	 */
-	public Stack<Integer> testPoints() {
-		Random randNumGenerator = new Random();
-		Stack<Integer> stack = new Stack<Integer>();
-
-		int[] x = new int[100];
-		for (int i=0; i<x.length; i++)
+	public Stack<Double> stackOfPoints(double[] cluster) {
+		
+		Stack<Double> stack = new Stack<Double>();
+		for (int i=0; i < cluster.length; i++)
 		{
-			x[i] = (randNumGenerator.nextInt(1000)+1);
-			stack.push(x[i]);
-			//System.out.println(x[i]);
+			if (cluster[i] != 0 && cluster.length != 0) {
+				stack.push(cluster[i]);
+				//log("whats in stack " + stack.pop());
+			}
 		}
 		return stack;
 	}
@@ -113,10 +112,10 @@ public class FractalInitialization {
 	 * @param threshold dynamic distance threshold.
 	 * @return return the neighbor.
 	 */
-	private int nearestNeighbor(int currentPoint, int neighbor, int threshold) {
-		int foundNeighbor = 0;
+	private double nearestNeighbor(double currentPoint, double neighbor, double threshold) {
+		double foundNeighbor = 0;
 		if (currentPoint != 0 && neighbor != 0 && threshold != 0) {
-			int distance = 0;
+			double distance = 0;
 			distance = Math.abs(neighbor - currentPoint);
 			if (distance != 0 && distance <= threshold) {
 				foundNeighbor = neighbor;
@@ -134,22 +133,38 @@ public class FractalInitialization {
 		
 		double[] bigCluster = combineArrays(generateClusters(1, 25), generateClusters(500, 625));
 		
-		LinkedList<Integer> tempList = new LinkedList<Integer>();
-		ArrayList<Integer> cluster = new ArrayList<Integer>();
-	
-		if(!testPoints().isEmpty()) {
-			for(int i =0; i < testPoints().size(); i++) {
-				tempList.add(testPoints().pop());
+		ArrayList<Double> tempList = new ArrayList<Double>();
+		ArrayList<Double> cluster = new ArrayList<Double>();
+		
+		if(bigCluster.length != 0) {
+			for (int i = 0; i < bigCluster.length; i++) {
+				double temp = bigCluster[i];
+				tempList.add(temp);
 			}
 		}
-		int tempHolder = tempList.getFirst();
-		System.out.println("first item of the linkedlist " + tempHolder);
-		Iterator<Integer> iterator = tempList.iterator();
-		
+	
+		/*
+		if(!testPoints(bigCluster).isEmpty()) {
+			for(int i =0; i < testPoints(bigCluster).size(); i++) {
+				tempList.add(testPoints(bigCluster).pop());
+				log("whats in templist " + tempList.get(i));
+
+			}
+		}
+		*/
+		Iterator<Double> iterator = tempList.iterator();
+
 		while (iterator.hasNext()) {
 			for (int i=0; i < tempList.size(); i++) {
-				int tempNeighbor = testPoints().pop();
-				int resultNeighbor = nearestNeighbor(tempList.get(i), tempNeighbor, this.getDistanceThreshold());
+				double resultNeighbor = 0;
+				double aPointInCluster = tempList.get(i);
+				for (int k = 0; k < stackOfPoints(bigCluster).size();) {
+					resultNeighbor = nearestNeighbor(aPointInCluster, stackOfPoints(bigCluster).elementAt(k), this.getDistanceThreshold());
+					if (resultNeighbor != 0)
+						break;
+					else
+						k++;
+				}
 				if (resultNeighbor != 0) {
 					System.out.println("Found Neighbor " + resultNeighbor);
 					if (!cluster.contains(i))
@@ -172,9 +187,9 @@ public class FractalInitialization {
 		System.out.println("cluster size " + size);
 		for (int i=0; i < cluster.size(); i++) {
 			System.out.println("whats in the cluster -> " + cluster.get(i));
-		}
+		} 
 	}
-
+	
 	/**
 	 * Get the threshold distance value.
 	 * @return
@@ -216,14 +231,9 @@ public class FractalInitialization {
 	public static void main (String[] args) {
 		FractalInitialization fractInt = new FractalInitialization();
 		//fractInt.isBelongToCluster();
-		double[] bigCluster = new double[50];
-		double[] cluster1 = fractInt.generateClusters(1, 24);
-		double[] cluster2 = fractInt.generateClusters(100, 225);
-		bigCluster = fractInt.combineArrays(cluster1, cluster2);
-		for (int i = 0; i < bigCluster.length; i++) {
-			fractInt.log("Whats in array" + bigCluster[i]);
-		}
-		System.out.println(bigCluster.length);
+		//double[] bigCluster = fractInt.combineArrays(fractInt.generateClusters(1, 25), fractInt.generateClusters(500, 625));
+		//fractInt.testPoints(bigCluster);
+		fractInt.isBelongToCluster();
 
 	}	
 
