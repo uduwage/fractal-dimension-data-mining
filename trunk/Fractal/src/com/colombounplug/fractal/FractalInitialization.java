@@ -117,7 +117,6 @@ public class FractalInitialization {
 	 */
 	private double nearestNeighbor(double currentPoint, double neighbor, double threshold) {
 		double foundNeighbor = 0;
-		ArrayList<Double> clusterWithNeighbor = new ArrayList<Double>();
 		if (currentPoint != 0 && neighbor != 0 && threshold != 0 && currentPoint != neighbor) {
 			double distance = 0;
 			distance = Math.abs(neighbor - currentPoint);
@@ -125,7 +124,6 @@ public class FractalInitialization {
 				foundNeighbor = neighbor;
 				if (distance < getPreviousDistance()) {
 					setPreviousDistance(distance);
-					clusterWithNeighbor.add(foundNeighbor);
 					return foundNeighbor; 
 				}
 			}
@@ -165,13 +163,13 @@ public class FractalInitialization {
 				for (int k = 0; k < bigCluster.length; k++) {
 					resultNeighbor = nearestNeighbor(aPointInCluster, bigCluster[k], this.getDistanceThreshold());
 					if (resultNeighbor != 0) {
-						cluster.add(resultNeighbor); /*
+						cluster.add(resultNeighbor); 
 						for(int l = 0; l < cluster.size(); l++) {
 							double nearest = Math.abs(cluster.get(l) - aPointInCluster);
 							if (nearest > (Math.abs(resultNeighbor - aPointInCluster))  && cluster.get(l) != aPointInCluster) {
 								cluster.remove(l);
 							}
-						} */
+						}
 					}
 					//cluster.add(tempList.get(i));
 				}
