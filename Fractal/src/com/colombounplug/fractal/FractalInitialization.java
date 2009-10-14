@@ -141,6 +141,7 @@ public class FractalInitialization {
 		
 		ArrayList<Double> tempList = new ArrayList<Double>();
 		ArrayList<Double> cluster = new ArrayList<Double>();
+		ArrayList<Double> finalCluster =  new ArrayList<Double>();
 		
 		cluster.clear();
 		
@@ -152,43 +153,44 @@ public class FractalInitialization {
 		}
 	
 		Iterator<Double> iterator = tempList.iterator();
-		double resultNeighbor  = 0;
+		//double resultNeighbor  = 0;
+
 
 		while (iterator.hasNext()) {
 			for (int i=0; i < tempList.size(); i++) {
-				System.out.println("threshold " + this.distanceThreshold);
+				System.out.println("threshold " + this.getDistanceThreshold());
 				//double resultNeighbor = 0;
 				double aPointInCluster = tempList.get(i);
 				cluster.add(aPointInCluster);
+				double foundNeighbor = 0;
 				for (int k = 0; k < bigCluster.length; k++) {
-					resultNeighbor = nearestNeighbor(aPointInCluster, bigCluster[k], this.getDistanceThreshold());
-					if (resultNeighbor != 0) {
-						cluster.add(resultNeighbor); 
-						for(int l = 0; l < cluster.size(); l++) {
-							double nearest = Math.abs(cluster.get(l) - aPointInCluster);
-							if (nearest > (Math.abs(resultNeighbor - aPointInCluster))  && cluster.get(l) != aPointInCluster) {
-								cluster.remove(l);
-							}
+					//resultNeighbor = nearestNeighbor(aPointInCluster, bigCluster[k], this.getDistanceThreshold());
+					//foundNeighbor = 0;
+					if (aPointInCluster != 0 && bigCluster[k] != 0 && this.getDistanceThreshold() != 0 && aPointInCluster != bigCluster[k]) {
+						double distance = 0;
+						distance = Math.abs(aPointInCluster - bigCluster[k]);
+						if (distance != 0 && distance <= this.getDistanceThreshold() && distance <= this.getPreviousDistance()) {
+							foundNeighbor = bigCluster[k];
+							cluster.add(foundNeighbor);
+							this.setPreviousDistance(distance);
+							distanceMap.put(aPointInCluster, foundNeighbor);
+							
 						}
 					}
-					//cluster.add(tempList.get(i));
 				}
-				if (resultNeighbor != 0.0)
-					System.out.println("Value of the Neighbor " + resultNeighbor);
 
+				if (foundNeighbor == 0) {
+					int newThreshold = (this.distanceThreshold * 3);
+					this.setDistanceThreshold(newThreshold);
+				}					
 			}
-			int newThreshold = (this.distanceThreshold * 3);
-			this.setDistanceThreshold(newThreshold);			
+			this.setDistanceThreshold(this.distanceThreshold * 2);
 			iterator.next();
 		}
-		int size = cluster.size();
-		int count = 0;
-		System.out.println("cluster size " + size);
+
 		for (int i=0; i < cluster.size(); i++) {
 			if (cluster.get(i) != 0.0)
 				System.out.println("whats in the cluster -> " + cluster.get(i)); 
-			count++;
-			System.out.println(count);
 		} 
 	}
 	
@@ -247,6 +249,11 @@ public class FractalInitialization {
 		//double[] bigCluster = fractInt.combineArrays(fractInt.generateClusters(1, 25), fractInt.generateClusters(500, 625));
 		//fractInt.testPoints(bigCluster);
 		fractInt.isBelongToCluster();
+		/*
+		Iterator<Double> iterator = fractInt.distanceMap.keySet().iterator();
+		while (iterator.hasNext()) {
+			System.out.println(iterator.next());
+		} */
 
 	}	
 
