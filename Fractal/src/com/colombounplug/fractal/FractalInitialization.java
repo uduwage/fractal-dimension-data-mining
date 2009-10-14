@@ -22,6 +22,8 @@ public class FractalInitialization {
 	private int numOfClusters;
 	private HashMap<Double, Double> distanceMap = new HashMap<Double, Double>();
 	private double previousDistance;
+	private double[] visited;
+	private boolean wasVisited;
 	/**
 	 * Default constructor sets the threshold.
 	 */
@@ -29,6 +31,8 @@ public class FractalInitialization {
 		
 		Random random = new Random();
 		this.distanceThreshold = random.nextInt(6) + 1;
+		if (this.distanceThreshold == 0) 
+			this.distanceThreshold = random.nextInt(6) + 1;
 		this.previousDistance = 100000000000000.00;
 		//System.out.println("threshold " + this.distanceThreshold);
 	}
@@ -161,6 +165,7 @@ public class FractalInitialization {
 				System.out.println("threshold " + this.getDistanceThreshold());
 				//double resultNeighbor = 0;
 				double aPointInCluster = tempList.get(i);
+				
 				cluster.add(aPointInCluster);
 				double foundNeighbor = 0;
 				for (int k = 0; k < bigCluster.length; k++) {
@@ -174,7 +179,6 @@ public class FractalInitialization {
 							cluster.add(foundNeighbor);
 							this.setPreviousDistance(distance);
 							distanceMap.put(aPointInCluster, foundNeighbor);
-							
 						}
 					}
 				}
