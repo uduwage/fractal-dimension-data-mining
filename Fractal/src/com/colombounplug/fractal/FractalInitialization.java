@@ -115,6 +115,7 @@ public class FractalInitialization {
 	
 	/**
 	 * Find the nearest neighbor based on the distance threshold.
+	 * TODO:
 	 * @param currentPoint current point in the memory.
 	 * @param threshold dynamic distance threshold.
 	 * @return return the neighbor.
