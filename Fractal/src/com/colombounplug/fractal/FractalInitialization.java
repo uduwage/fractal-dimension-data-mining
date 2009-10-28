@@ -109,8 +109,6 @@ public class FractalInitialization {
 				double shortestDistance = Math.abs(currentPoint - neighbor[i]);
 				unsorted.put(shortestDistance, neighbor[i]);
 			}
-			//else
-			//	return 0.0;
 		}
 		if (!unsorted.isEmpty()) {
 			sorted = new TreeMap<Double, Double>(unsorted);
