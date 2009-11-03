@@ -18,13 +18,14 @@ import java.util.TreeMap;
 public class FractalInitialization {
 	
 	//distance threshold
-	private int distanceThreshold;
+	private double distanceThreshold;
 	private int numOfClusters;
-	private double previousDistance;
 	private double[] bigCluster;
 	private ArrayList<Double> cluster;
-	//private VisitedPoint[] visit;
 	private ArrayList<Double> tempList;
+	private HashMap<Double, Double> unsorted;
+	private boolean[] visited;
+	private VisitedPoint[] visit;
 	
 	/**
 	 * Default constructor sets the threshold.
@@ -35,10 +36,9 @@ public class FractalInitialization {
 		this.distanceThreshold = random.nextInt(6) + 1;
 		if (this.distanceThreshold == 0) 
 			this.distanceThreshold = random.nextInt(6) + 1;
-		this.previousDistance = 100000000000000.00;
+
 		bigCluster = combineArrays(generateClusters(1, 25), generateClusters(100, 125));
 		
-		//visit = new VisitedPoint[bigCluster.length];
 		tempList = new ArrayList<Double>();
 		cluster = new ArrayList<Double>();
 		
@@ -50,7 +50,8 @@ public class FractalInitialization {
 				tempList.add(temp);
 			}
 		}		
-
+		visited = new boolean[bigCluster.length];
+		unsorted = new HashMap<Double, Double>();
 	}
 	
 	/**
@@ -99,19 +100,22 @@ public class FractalInitialization {
 	 * @return return the neighbor.
 	 */
 	
-	private double nearestNeighbor(double currentPoint, double[] neighbor) {
+	private double nearestNeighbor(double currentPoint) {
 		
 		HashMap<Double, Double> unsorted = new HashMap<Double, Double>();
 		TreeMap<Double, Double> sorted = null; 
 		
-		for (int i = 0; i < neighbor.length; i++) {
-			if (neighbor[i] != 0.0 && neighbor[i] != currentPoint) {
-				double shortestDistance = Math.abs(currentPoint - neighbor[i]);
-				unsorted.put(shortestDistance, neighbor[i]);
+		for (int i = 0; i < bigCluster.length; i++) {
+			if (bigCluster[i] != 0.0 && bigCluster[i] != currentPoint) {
+				double shortestDistance = Math.abs(currentPoint - bigCluster[i]);
+				if (shortestDistance <= this.getDistanceThreshold())
+					unsorted.put(shortestDistance, bigCluster[i]);
 			}
 		}
 		if (!unsorted.isEmpty()) {
 			sorted = new TreeMap<Double, Double>(unsorted);
+			double avgDist = avgDistanceInCluster();
+			
 			return sorted.firstEntry().getValue();
 		}
 		
@@ -162,13 +166,12 @@ public class FractalInitialization {
 			
 			for (int i=0; i < tempList.size(); i++) {
 				
-				double resultNeighbor = 0;
 				double aPointInCluster = tempList.get(i);
+				
 				cluster.add(aPointInCluster);
-				double[] neighbors = pointsWithinThreshold(aPointInCluster);
-				//resultNeighbor = nearestNeighbor(aPointInCluster, neighbors);
-				if ( nearestNeighbor(aPointInCluster, neighbors) != 0.0) {
-					cluster.add(resultNeighbor);
+				double newNeighbor = nearestNeighbor(aPointInCluster);
+				if ( newNeighbor != 0.0) {
+					cluster.add(newNeighbor);
 				}
 
 			}
@@ -183,17 +186,40 @@ public class FractalInitialization {
 	}
 	
 	/**
+	 * Calculate avg distance between points in cluster
+	 * @return
+	 */
+	public double avgDistanceInCluster() {
+		double avgDistance = 0.0;
+		Stack<Double> holder = new Stack<Double>();
+		for (int i = 0; i < cluster.size() - 1; i++) {
+			System.out.println(cluster.get(i));
+			for (int j = i+1; j < cluster.size(); j++) {
+				avgDistance = (cluster.get(i) + cluster.get(j))/2; 
+				holder.push(avgDistance);
+			}
+		}
+		Iterator<Double> iter = holder.iterator();
+		double avgClusterDist = 0;
+		while (iter.hasNext()) {
+			avgClusterDist =+ holder.pop();
+			System.out.println(avgClusterDist);
+		}
+		return avgClusterDist/cluster.size();
+	}
+	
+	/**
 	 * Get the threshold distance value.
 	 * @return
 	 */
-	public int getDistanceThreshold() {
+	public double getDistanceThreshold() {
 		return distanceThreshold;
 	}
 	/**
 	 * Set the threshold value
 	 * @param distanceThreshold
 	 */
-	public void setDistanceThreshold(int distanceThreshold) {
+	public void setDistanceThreshold(double distanceThreshold) {
 		this.distanceThreshold = distanceThreshold;
 	}
 	
@@ -211,17 +237,6 @@ public class FractalInitialization {
 	 */
 	public void setNumOfClusters(int numClusters) {
 		this.numOfClusters = numClusters;
-	}
-	
-	/**
-	 * Get previous distance to of the point.
-	 * @return
-	 */
-	public double getPreviousDistance() {
-		return previousDistance;
-	}
-	public void setPreviousDistance(double previousDistance) {
-		this.previousDistance = previousDistance;
 	}
 	
 	/**
