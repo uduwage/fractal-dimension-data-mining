@@ -104,6 +104,7 @@ public class FractalInitialization {
 		
 		HashMap<Double, Double> unsorted = new HashMap<Double, Double>();
 		TreeMap<Double, Double> sorted = null; 
+		double foundNeighbor = 0.0;
 		
 		for (int i = 0; i < bigCluster.length; i++) {
 			if (bigCluster[i] != 0.0 && bigCluster[i] != currentPoint) {
@@ -114,12 +115,12 @@ public class FractalInitialization {
 		}
 		if (!unsorted.isEmpty()) {
 			sorted = new TreeMap<Double, Double>(unsorted);
-			double avgDist = avgDistanceInCluster();
-			
-			return sorted.firstEntry().getValue();
+			this.setDistanceThreshold(avgDistanceInCluster());
+			foundNeighbor = sorted.firstEntry().getValue();
+			return foundNeighbor;
+		} else {
+			return 0.0;
 		}
-		
-		return 0.0;
 	}
 	
 	public double[][] distanceGrid() {
@@ -158,11 +159,11 @@ public class FractalInitialization {
 	 * Method will check if a point belongs to a cluster based on the dynamic 
 	 * threshold.
 	 */
-	public void isBelongToCluster(double point) {
+	public void isBelongToCluster() {
 
-		Iterator<Double> iterator = tempList.iterator();
+		//Iterator<Double> iterator = tempList.iterator();
 	
-		while (iterator.hasNext()) {
+		//while (iterator.hasNext()) {
 			
 			for (int i=0; i < tempList.size(); i++) {
 				
@@ -172,12 +173,14 @@ public class FractalInitialization {
 				double newNeighbor = nearestNeighbor(aPointInCluster);
 				if ( newNeighbor != 0.0) {
 					cluster.add(newNeighbor);
+					if (i + 1 > tempList.size() && (visited[i] != true)) {
+						isBelongToCluster();
+					}
 				}
 
 			}
-			this.setDistanceThreshold(this.distanceThreshold * 2);
-			iterator.next();
-		}
+			//iterator.next();
+		//}
 
 		for (int i=0; i < cluster.size(); i++) {
 			if (cluster.get(i) != 0.0)
@@ -248,7 +251,7 @@ public class FractalInitialization {
 	
 	public static void main (String[] args) {
 		FractalInitialization fractInt = new FractalInitialization();
-		fractInt.isBelongToCluster(0.0);
+		fractInt.isBelongToCluster();
 		fractInt.distanceGrid();
 		/*
 		Iterator<Double> iterator = fractInt.distanceMap.keySet().iterator();
