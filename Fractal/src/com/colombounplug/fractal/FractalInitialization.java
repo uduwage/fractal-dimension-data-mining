@@ -22,7 +22,7 @@ public class FractalInitialization {
 	private int numOfClusters;
 	private double[] bigCluster;
 	private ArrayList<Double> cluster;
-	private ArrayList<Double> tempList;
+	public ArrayList<Double> tempList;
 	private HashMap<Double, Double> unsorted;
 	private boolean[] visited;
 	private VisitedPoint[] visit;
@@ -33,9 +33,9 @@ public class FractalInitialization {
 	public FractalInitialization () {
 		
 		Random random = new Random();
-		this.distanceThreshold = random.nextInt(6) + 1;
+		this.distanceThreshold = random.nextInt(10) + 1;
 		if (this.distanceThreshold == 0) 
-			this.distanceThreshold = random.nextInt(6) + 1;
+			this.distanceThreshold = random.nextInt(10) + 1;
 
 		bigCluster = combineArrays(generateClusters(1, 25), generateClusters(100, 125));
 		
@@ -160,32 +160,26 @@ public class FractalInitialization {
 	 * threshold.
 	 */
 	public void isBelongToCluster() {
-
-		//Iterator<Double> iterator = tempList.iterator();
-	
-		//while (iterator.hasNext()) {
 			
-			for (int i=0; i < tempList.size(); i++) {
-				
-				double aPointInCluster = tempList.get(i);
-				
-				cluster.add(aPointInCluster);
-				double newNeighbor = nearestNeighbor(aPointInCluster);
-				if ( newNeighbor != 0.0) {
-					cluster.add(newNeighbor);
-					if (i + 1 > tempList.size() && (visited[i] != true)) {
-						isBelongToCluster();
-					}
+		for (int i = 0; i < tempList.size(); i++) {
+
+			double aPointInCluster = tempList.get(i);
+
+			cluster.add(aPointInCluster);
+			double newNeighbor = nearestNeighbor(aPointInCluster);
+			if (newNeighbor != 0.0) {
+				cluster.add(newNeighbor);
+				if (i + 1 > tempList.size() && (visited[i] != true)) {
+					isBelongToCluster();
 				}
-
 			}
-			//iterator.next();
-		//}
 
-		for (int i=0; i < cluster.size(); i++) {
+		}
+
+		for (int i = 0; i < cluster.size(); i++) {
 			if (cluster.get(i) != 0.0)
-				System.out.println("whats in the cluster -> " + cluster.get(i)); 
-		} 
+				System.out.println("whats in the cluster -> " + cluster.get(i));
+		}
 	}
 	
 	/**
@@ -253,12 +247,7 @@ public class FractalInitialization {
 		FractalInitialization fractInt = new FractalInitialization();
 		fractInt.isBelongToCluster();
 		fractInt.distanceGrid();
-		/*
-		Iterator<Double> iterator = fractInt.distanceMap.keySet().iterator();
-		while (iterator.hasNext()) {
-			System.out.println(iterator.next());
-		} */
-
+		
 	}	
 
 }
