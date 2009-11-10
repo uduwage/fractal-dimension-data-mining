@@ -26,7 +26,6 @@ public class FractalInitialization {
 	public ArrayList<Double> tempList;
 	private HashMap<Double, Double> unsorted;
 	private boolean[] visited;
-	private VisitedPoint[] isVisited;
 	private ArrayList<Double> visitedPoints;
 	public HashMap<Double, Boolean> visitedMap;
 	private double initialDistanceThreshold;
