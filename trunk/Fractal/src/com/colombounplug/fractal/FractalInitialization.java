@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 
@@ -29,7 +30,7 @@ public class FractalInitialization {
 	private ArrayList<Double> visitedPoints;
 	public HashMap<Double, Boolean> visitedMap;
 	private double initialDistanceThreshold;
-	HashMap<String, Double> mapOfCluster;
+	HashMap<Integer, Double> mapOfCluster;
 	
 	/**
 	 * Default constructor sets the threshold and handles necessary object creation.
@@ -60,6 +61,7 @@ public class FractalInitialization {
 		visitedPoints = new ArrayList<Double>();
 		visitedMap = new HashMap<Double, Boolean>();
 		this.setNumOfClusters(0);
+		mapOfCluster = new HashMap<Integer, Double>();
 	}
 	
 	/**
@@ -115,7 +117,7 @@ public class FractalInitialization {
 		double foundNeighbor = 0.0;
 		
 		for (int i = 0; i < bigCluster.length; i++) {
-			if (bigCluster[i] != 0.0 && bigCluster[i] != currentPoint) {
+			if (bigCluster[i] != 0.0 && bigCluster[i] != currentPoint && !visitedMap.containsKey(bigCluster[i])) {
 				double shortestDistance = Math.abs(currentPoint - bigCluster[i]);
 				if (shortestDistance <= this.getDistanceThreshold())
 					unsorted.put(shortestDistance, bigCluster[i]);
@@ -173,12 +175,14 @@ public class FractalInitialization {
 		if(!cluster.contains(aPointInCluster)) {
 			cluster.add(aPointInCluster);
 			this.setNumOfClusters(this.getNumOfClusters() + 1);
+			mapOfCluster.put(this.getNumOfClusters(), aPointInCluster);
 		}
 		visitedMap.put(aPointInCluster, true);
 		double newNeighbor = nearestNeighbor(aPointInCluster);
 		if(newNeighbor != 0.0) {
 			cluster.add(newNeighbor);
-			this.setDistanceThreshold(avgDistanceInCluster());
+			mapOfCluster.put(this.getNumOfClusters(), newNeighbor);
+			this.setDistanceThreshold(avgDistanceInCluster() * this.initialDistanceThreshold);
 			if (!visitedMap.containsKey(newNeighbor)) {
 				callNearestDFSFashion(newNeighbor);
 			}
@@ -271,6 +275,13 @@ public class FractalInitialization {
 			if (fractInt.cluster.get(i) != 0.0)
 				System.out.println("whats in the cluster -> " + fractInt.cluster.get(i));
 		}	
+		
+		Set set = fractInt.mapOfCluster.entrySet();
+		Iterator iter = set.iterator();
+		
+		while (iter.hasNext()) {
+			System.out.println(iter.next());
+		}
 		
 		System.out.println("Number of clusters " + fractInt.getNumOfClusters());
 		//fractInt.distanceGrid();
