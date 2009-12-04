@@ -29,7 +29,8 @@ public class FractalInitialization {
 	private ArrayList<Double> visitedPoints;
 	public HashMap<Double, Boolean> visitedMap;
 	private double initialDistanceThreshold;
-	HashMap<Integer, Double> mapOfCluster;
+	HashMap<Double, Integer> mapOfCluster;
+	ArrayList<Double> tempCluster;
 	
 	/**
 	 * Default constructor sets the threshold and handles necessary object creation.
@@ -60,7 +61,9 @@ public class FractalInitialization {
 		visitedPoints = new ArrayList<Double>();
 		visitedMap = new HashMap<Double, Boolean>();
 		this.setNumOfClusters(0);
-		mapOfCluster = new HashMap<Integer, Double>();
+		mapOfCluster = new HashMap<Double, Integer>();
+		tempCluster = new ArrayList<Double>();
+		
 	}
 	
 	/**
@@ -168,26 +171,31 @@ public class FractalInitialization {
 	 * Method will check if a point belongs to a cluster based on the dynamic 
 	 * threshold.
 	 */
-	public void callNearestDFSFashion(double point) {
+	public void dfsNearest(double point) {
 
 		double aPointInCluster = point;
 		if(!cluster.contains(aPointInCluster)) {
 			cluster.add(aPointInCluster);
 			this.setNumOfClusters(this.getNumOfClusters() + 1);
-			mapOfCluster.put(this.getNumOfClusters(), aPointInCluster);
+			mapOfCluster.put(aPointInCluster, this.getNumOfClusters());
+			tempCluster.clear();
+			tempCluster.add(aPointInCluster);
+			
 		}
 		visitedMap.put(aPointInCluster, true);
 		double newNeighbor = nearestNeighbor(aPointInCluster);
 		if(newNeighbor != 0.0) {
 			cluster.add(newNeighbor);
-			mapOfCluster.put(this.getNumOfClusters(), newNeighbor);
+			mapOfCluster.put(newNeighbor, this.getNumOfClusters());
 			this.setDistanceThreshold(avgDistanceInCluster() * this.initialDistanceThreshold);
+			tempCluster.add(newNeighbor);
 			if (!visitedMap.containsKey(newNeighbor)) {
-				callNearestDFSFashion(newNeighbor);
+				dfsNearest(newNeighbor);
 			}
 		}
-		if(this.getDistanceThreshold() != this.initialDistanceThreshold)
+		if(this.getDistanceThreshold() != this.initialDistanceThreshold) {
 			this.setDistanceThreshold(this.initialDistanceThreshold);
+		}
 	}
 
 	public void dfsNearestNeighbor(double point, ArrayList<Double> list, boolean[] pointIsVisited ) {
@@ -215,7 +223,7 @@ public class FractalInitialization {
 		double avgDistance = 0.0;
 		Stack<Double> holder = new Stack<Double>();
 		for (int i = 0; i < cluster.size() - 1; i++) {
-			System.out.println(cluster.get(i));
+			//System.out.println(cluster.get(i));
 			for (int j = i+1; j < cluster.size(); j++) {
 				avgDistance = (cluster.get(i) + cluster.get(j))/2; 
 				holder.push(avgDistance);
@@ -225,8 +233,9 @@ public class FractalInitialization {
 		double avgClusterDist = 0;
 		while (iter.hasNext()) {
 			avgClusterDist =+ holder.pop();
-			System.out.println(avgClusterDist);
+			//System.out.println(avgClusterDist);
 		}
+		System.out.println(avgClusterDist/cluster.size());
 		return avgClusterDist/cluster.size();
 	}
 	
@@ -263,12 +272,11 @@ public class FractalInitialization {
 	
 	
 	public static void main (String[] args) {
-		ArrayList<Double> list = new ArrayList<Double>();
 		
 		FractalInitialization fractInt = new FractalInitialization();
 		boolean[] bool = new boolean[fractInt.tempList.size()];
 		for(int i = 0; i < fractInt.tempList.size(); i++) {
-			fractInt.callNearestDFSFashion(fractInt.tempList.get(i));
+			fractInt.dfsNearest(fractInt.tempList.get(i));
 		}
 		for (int i = 0; i < fractInt.cluster.size(); i++) {
 			if (fractInt.cluster.get(i) != 0.0)
@@ -283,8 +291,6 @@ public class FractalInitialization {
 		}
 		
 		System.out.println("Number of clusters " + fractInt.getNumOfClusters());
-		//fractInt.distanceGrid();
-		
 	}	
 
 }
