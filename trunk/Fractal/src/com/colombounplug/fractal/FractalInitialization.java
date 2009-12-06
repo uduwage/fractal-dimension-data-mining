@@ -4,12 +4,17 @@
 package com.colombounplug.fractal;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 /**
  * This class handles initialization process of clusters.
@@ -238,6 +243,42 @@ public class FractalInitialization {
 		System.out.println(avgClusterDist/cluster.size());
 		return avgClusterDist/cluster.size();
 	}
+	/*
+	  public static List<Object> getKeysFromValue(Map<?, ?> hm, Object value){
+		    List <Object>list = new ArrayList<Object>();
+		    for(Object o:hm.keySet()){
+		        if(hm.get(o).equals(value)) {
+		            list.add(o);
+		        }
+		    }
+		    return list;
+		  } */
+		  	
+	/**
+	 * Calculate Fractal Dimension using box-counting.
+	 */
+	public void boxCounting() {
+		List<Double> keyList = new ArrayList<Double>();
+		Double range = 5.5;
+		int count = 0;
+		
+		for(int i = 1; i <= this.numOfClusters; i++) {
+			System.out.println("Printing Cluster " + i);
+			for(Double key : mapOfCluster.keySet()) {
+				if(mapOfCluster.get(key).equals(i)) {
+					keyList.add(key);
+					Collections.sort(keyList);
+					System.out.println(key);
+					if(key < range) {
+						count = count + 1;
+					}
+				}
+			}
+			System.out.println("Cluster " + i + " require " + count + " boxes");
+			double fractalDimension = Math.log(count) / Math.log(range);
+			System.out.println("Fractal Dimension of cluster " + i + " is " +fractalDimension);
+		}
+	}
 	
 	/**
 	 * Get the threshold distance value.
@@ -291,6 +332,8 @@ public class FractalInitialization {
 		}
 		
 		System.out.println("Number of clusters " + fractInt.getNumOfClusters());
+		
+		fractInt.boxCounting();
 	}	
 
 }
