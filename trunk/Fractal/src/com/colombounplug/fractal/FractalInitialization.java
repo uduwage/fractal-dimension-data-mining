@@ -42,11 +42,12 @@ public class FractalInitialization {
 	 */
 	public FractalInitialization () {
 		
-		Random random = new Random();
+		Random random = new Random(); /*
 		this.distanceThreshold = random.nextInt(10) + 1;
 		if (this.distanceThreshold == 0) 
-			this.distanceThreshold = random.nextInt(10) + 1;
-
+			this.distanceThreshold = random.nextInt(10) + 1; */
+		this.setDistanceThreshold(15.4564);
+		
 		initialDistanceThreshold = this.getDistanceThreshold();
 		bigCluster = combineArrays(generateClusters(1, 25), generateClusters(100, 125));
 		
@@ -259,21 +260,109 @@ public class FractalInitialization {
 	 */
 	public void boxCounting() {
 		List<Double> keyList = new ArrayList<Double>();
-		Double range = 5.5;
+		Double range = 5.0;
+		int tempCount = 0;
 		int count = 0;
 		
 		for(int i = 1; i <= this.numOfClusters; i++) {
+			
 			System.out.println("Printing Cluster " + i);
+			count = 0;
 			for(Double key : mapOfCluster.keySet()) {
 				if(mapOfCluster.get(key).equals(i)) {
 					keyList.add(key);
 					Collections.sort(keyList);
 					System.out.println(key);
+					/*
 					if(key < range) {
 						count = count + 1;
+					}*/					
+					
+					//put this in a method and call once before adding a new point to the cluster
+					//then call it again to calculate the FD
+					//use threshold had benchmark of the FD change.
+					if(key < range * 2 && key > range) {
+						//count = 0;
+						count += 1;
 					}
+					else if(key < range * 3 && key > range * 2) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 4 && key > range * 3) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 5 && key > range * 4) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 6 && key > range * 5) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 7 && key > range * 6) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 8 && key > range * 7) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 9 && key > range * 8) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 10 && key > range * 9) {
+						count += 1;
+					}
+					else if(key < range * 11 && key > range * 10) {
+						count += 1;	
+					}
+					else if(key < range * 12 && key > range * 11) {
+						count += 1;	
+					}
+					else if(key < range * 13 && key > range * 12) {
+						count += 1;	
+					}
+					else if(key < range * 14 && key > range * 13) {
+						count += 1;
+					}
+					else if(key < range * 15 && key > range * 14) {
+						count += 1;	
+					}
+					else if(key < range * 16 && key > range * 15) {
+						count += 1;
+					}
+					else if(key < range * 17 && key > range * 16) {
+						count += 1;	
+					}
+					else if(key < range * 18 && key > range * 17)
+						count += 1;	
+					else if(key < range * 19 && key > range * 18)
+						count += 1;
+					else if(key < range * 20 && key > range * 19)
+						count += 1;
+					else if(key < range * 21 && key > range * 20)
+						count += 1;
+					else if(key < range * 22 && key > range * 21)
+						count += 1;
+					else if(key < range * 23 && key > range * 22)
+						count += 1;	
+					else if(key < range * 24 && key > range * 23) {
+						//count = 0;
+						count += 1;
+					}
+					else if(key < range * 25 && key > range * 24) {
+						//count = 0;
+						count += 1;	
+					}
+					else if(key < range)
+						count += 1;
 				}
+			
 			}
+				
 			System.out.println("Cluster " + i + " require " + count + " boxes");
 			double fractalDimension = Math.log(count) / Math.log(range);
 			System.out.println("Fractal Dimension of cluster " + i + " is " +fractalDimension);
