@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -36,17 +37,18 @@ public class FractalInitialization {
 	private double initialDistanceThreshold;
 	HashMap<Double, Integer> mapOfCluster;
 	ArrayList<Double> tempCluster;
+	private double lastValue;
 	
 	/**
 	 * Default constructor sets the threshold and handles necessary object creation.
 	 */
 	public FractalInitialization () {
 		
-		Random random = new Random(); /*
+		Random random = new Random(); 
 		this.distanceThreshold = random.nextInt(10) + 1;
 		if (this.distanceThreshold == 0) 
-			this.distanceThreshold = random.nextInt(10) + 1; */
-		this.setDistanceThreshold(15.4564);
+			this.distanceThreshold = random.nextInt(10) + 1; 
+		//this.setDistanceThreshold(15.4564);
 		
 		initialDistanceThreshold = this.getDistanceThreshold();
 		bigCluster = combineArrays(generateClusters(1, 25), generateClusters(100, 125));
@@ -61,7 +63,11 @@ public class FractalInitialization {
 				double temp = bigCluster[i];
 				tempList.add(temp);
 			}
-		}		
+		}
+		
+		Collections.sort(tempList);
+		lastValue = tempList.get(tempList.size()-1);
+		
 		visited = new boolean[bigCluster.length];
 		unsorted = new HashMap<Double, Double>();
 		visitedPoints = new ArrayList<Double>();
@@ -244,30 +250,23 @@ public class FractalInitialization {
 		System.out.println(avgClusterDist/cluster.size());
 		return avgClusterDist/cluster.size();
 	}
-	/*
-	  public static List<Object> getKeysFromValue(Map<?, ?> hm, Object value){
-		    List <Object>list = new ArrayList<Object>();
-		    for(Object o:hm.keySet()){
-		        if(hm.get(o).equals(value)) {
-		            list.add(o);
-		        }
-		    }
-		    return list;
-		  } */
-		  	
+
 	/**
 	 * Calculate Fractal Dimension using box-counting.
 	 */
 	public void boxCounting() {
 		List<Double> keyList = new ArrayList<Double>();
 		Double range = 5.0;
+		double scale = this.lastValue / range;
 		int tempCount = 0;
 		int count = 0;
 		
 		for(int i = 1; i <= this.numOfClusters; i++) {
-			
+			if(!keyList.isEmpty())
+				keyList.removeAll(keyList);
 			System.out.println("Printing Cluster " + i);
 			count = 0;
+			tempCount = 0;
 			for(Double key : mapOfCluster.keySet()) {
 				if(mapOfCluster.get(key).equals(i)) {
 					keyList.add(key);
@@ -277,7 +276,8 @@ public class FractalInitialization {
 					if(key < range) {
 						count = count + 1;
 					}*/					
-					
+
+
 					//put this in a method and call once before adding a new point to the cluster
 					//then call it again to calculate the FD
 					//use threshold had benchmark of the FD change.
@@ -314,9 +314,11 @@ public class FractalInitialization {
 						count += 1;
 					}
 					else if(key < range * 10 && key > range * 9) {
+						//count = 0;
 						count += 1;
 					}
 					else if(key < range * 11 && key > range * 10) {
+						//count = 0;
 						count += 1;	
 					}
 					else if(key < range * 12 && key > range * 11) {
@@ -354,7 +356,6 @@ public class FractalInitialization {
 						count += 1;
 					}
 					else if(key < range * 25 && key > range * 24) {
-						//count = 0;
 						count += 1;	
 					}
 					else if(key < range)
@@ -362,11 +363,42 @@ public class FractalInitialization {
 				}
 			
 			}
+			/*
+			for (Double double1 : keyList) {
+				System.out.println("Cluster element " + double1);
+				
+				for(int rangeCount = 1; rangeCount < scale; rangeCount++) {
+					if((double1 < (range * rangeCount)) && (double1 > (rangeCount - 1) * range)) {
+						//System.out.println("rangeCount * range " + (rangeCount * range));
+						//System.out.println("rangeCount - 1) * range " + ((rangeCount - 1) * range));
+						//if(keyList.indexOf(double1) - 1 != 0 && ((keyList.indexOf(double1) - 1) - double1) > range)
+							tempCount += 1;
+						
+					}
+					System.out.println(rangeCount);
+				}				
+			}*/ 
+			
+			for(int rangeCount = 1; rangeCount < scale; rangeCount++) {
+				for (Double double1 : keyList) {
+					if((double1 < (range * rangeCount)) && (double1 > (rangeCount - 1) * range)) {
+						tempCount += 1;
+						break;
+					}
+				}
+			}
+			
+			
+			System.out.println("use temp count: Cluster " + i + " require " + tempCount + " boxes");
+			double fractalDimension = Math.log(tempCount) / Math.log(scale);
+			System.out.println("use tempCount: Fractal Dimension of cluster " + i + " is " +fractalDimension);
 				
 			System.out.println("Cluster " + i + " require " + count + " boxes");
-			double fractalDimension = Math.log(count) / Math.log(range);
-			System.out.println("Fractal Dimension of cluster " + i + " is " +fractalDimension);
+			double fractalDimension2 = Math.log(count) / Math.log(25);
+			System.out.println("Fractal Dimension of cluster " + i + " is " +fractalDimension2);
 		}
+		System.out.println("Count is " + count + "&& tempCount is " + tempCount);
+		System.out.println("Scale is " + scale);
 	}
 	
 	/**
@@ -409,8 +441,8 @@ public class FractalInitialization {
 			fractInt.dfsNearest(fractInt.tempList.get(i));
 		}
 		for (int i = 0; i < fractInt.cluster.size(); i++) {
-			if (fractInt.cluster.get(i) != 0.0)
-				System.out.println("whats in the cluster -> " + fractInt.cluster.get(i));
+			if (fractInt.cluster.get(i) != 0.0){}
+				//System.out.println("whats in the cluster -> " + fractInt.cluster.get(i));
 		}	
 		
 		Set set = fractInt.mapOfCluster.entrySet();
@@ -423,6 +455,8 @@ public class FractalInitialization {
 		System.out.println("Number of clusters " + fractInt.getNumOfClusters());
 		
 		fractInt.boxCounting();
+		
+		System.out.println(fractInt.lastValue);
 	}	
 
 }
