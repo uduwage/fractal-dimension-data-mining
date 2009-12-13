@@ -4,18 +4,14 @@
 package com.colombounplug.fractal;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 /**
  * This class handles initialization process of clusters.
@@ -38,6 +34,9 @@ public class FractalInitialization {
 	HashMap<Double, Integer> mapOfCluster;
 	ArrayList<Double> tempCluster;
 	private double lastValue;
+	private double[] newPoints;
+	public ArrayList<Double> listOfNewPoints;
+	HashMap<Integer, Double> mapOfFractDimension;
 	
 	/**
 	 * Default constructor sets the threshold and handles necessary object creation.
@@ -52,9 +51,12 @@ public class FractalInitialization {
 		
 		initialDistanceThreshold = this.getDistanceThreshold();
 		bigCluster = combineArrays(generateClusters(1, 25), generateClusters(100, 125));
+		newPoints = combineArrays(generateClusters(25, 75), generateClusters(125, 150));
 		
 		tempList = new ArrayList<Double>();
 		cluster = new ArrayList<Double>();
+		listOfNewPoints = new ArrayList<Double>();
+		
 		
 		cluster.clear();
 		
@@ -75,6 +77,7 @@ public class FractalInitialization {
 		this.setNumOfClusters(0);
 		mapOfCluster = new HashMap<Double, Integer>();
 		tempCluster = new ArrayList<Double>();
+		mapOfFractDimension = new HashMap<Integer, Double>();
 		
 	}
 	
@@ -252,13 +255,13 @@ public class FractalInitialization {
 	}
 
 	/**
-	 * Calculate Fractal Dimension using box-counting.
+	 * Method calculate Fractal Dimension using box-counting.
 	 */
 	public void boxCounting() {
 		List<Double> keyList = new ArrayList<Double>();
 		Double range = 5.0;
 		double scale = this.lastValue / range;
-		int tempCount = 0;
+		int boxCount = 0;
 		int count = 0;
 		
 		for(int i = 1; i <= this.numOfClusters; i++) {
@@ -266,139 +269,49 @@ public class FractalInitialization {
 				keyList.removeAll(keyList);
 			System.out.println("Printing Cluster " + i);
 			count = 0;
-			tempCount = 0;
+			boxCount = 0;
 			for(Double key : mapOfCluster.keySet()) {
 				if(mapOfCluster.get(key).equals(i)) {
 					keyList.add(key);
 					Collections.sort(keyList);
 					System.out.println(key);
-					/*
-					if(key < range) {
-						count = count + 1;
-					}*/					
-
-
-					//put this in a method and call once before adding a new point to the cluster
-					//then call it again to calculate the FD
-					//use threshold had benchmark of the FD change.
-					if(key < range * 2 && key > range) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 3 && key > range * 2) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 4 && key > range * 3) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 5 && key > range * 4) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 6 && key > range * 5) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 7 && key > range * 6) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 8 && key > range * 7) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 9 && key > range * 8) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 10 && key > range * 9) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 11 && key > range * 10) {
-						//count = 0;
-						count += 1;	
-					}
-					else if(key < range * 12 && key > range * 11) {
-						count += 1;	
-					}
-					else if(key < range * 13 && key > range * 12) {
-						count += 1;	
-					}
-					else if(key < range * 14 && key > range * 13) {
-						count += 1;
-					}
-					else if(key < range * 15 && key > range * 14) {
-						count += 1;	
-					}
-					else if(key < range * 16 && key > range * 15) {
-						count += 1;
-					}
-					else if(key < range * 17 && key > range * 16) {
-						count += 1;	
-					}
-					else if(key < range * 18 && key > range * 17)
-						count += 1;	
-					else if(key < range * 19 && key > range * 18)
-						count += 1;
-					else if(key < range * 20 && key > range * 19)
-						count += 1;
-					else if(key < range * 21 && key > range * 20)
-						count += 1;
-					else if(key < range * 22 && key > range * 21)
-						count += 1;
-					else if(key < range * 23 && key > range * 22)
-						count += 1;	
-					else if(key < range * 24 && key > range * 23) {
-						//count = 0;
-						count += 1;
-					}
-					else if(key < range * 25 && key > range * 24) {
-						count += 1;	
-					}
-					else if(key < range)
-						count += 1;
 				}
 			
 			}
-			/*
-			for (Double double1 : keyList) {
-				System.out.println("Cluster element " + double1);
-				
-				for(int rangeCount = 1; rangeCount < scale; rangeCount++) {
-					if((double1 < (range * rangeCount)) && (double1 > (rangeCount - 1) * range)) {
-						//System.out.println("rangeCount * range " + (rangeCount * range));
-						//System.out.println("rangeCount - 1) * range " + ((rangeCount - 1) * range));
-						//if(keyList.indexOf(double1) - 1 != 0 && ((keyList.indexOf(double1) - 1) - double1) > range)
-							tempCount += 1;
-						
-					}
-					System.out.println(rangeCount);
-				}				
-			}*/ 
-			
+
 			for(int rangeCount = 1; rangeCount < scale; rangeCount++) {
 				for (Double double1 : keyList) {
 					if((double1 < (range * rangeCount)) && (double1 > (rangeCount - 1) * range)) {
-						tempCount += 1;
+						boxCount += 1;
 						break;
 					}
 				}
 			}
 			
-			
-			System.out.println("use temp count: Cluster " + i + " require " + tempCount + " boxes");
-			double fractalDimension = Math.log(tempCount) / Math.log(scale);
-			System.out.println("use tempCount: Fractal Dimension of cluster " + i + " is " +fractalDimension);
-				
-			System.out.println("Cluster " + i + " require " + count + " boxes");
-			double fractalDimension2 = Math.log(count) / Math.log(25);
-			System.out.println("Fractal Dimension of cluster " + i + " is " +fractalDimension2);
+			System.out.println("Cluster " + i + " require " + boxCount + " boxes");
+			double fractalDimension = Math.log(boxCount) / Math.log(scale);
+			System.out.println("Fractal Dimension of cluster " + i + " is " +fractalDimension);
+			this.mapOfFractDimension.put(i, fractalDimension);
+
 		}
-		System.out.println("Count is " + count + "&& tempCount is " + tempCount);
-		System.out.println("Scale is " + scale);
+		//System.out.println("Count is " + count + "&& tempCount is " + boxCount);
+		//System.out.println("Scale is " + scale);
+	}
+	
+	public void newFractalDimension() {
+		for(int clusterId = 1; clusterId <= this.numOfClusters; clusterId++) {
+			for(int i = 0; i < this.listOfNewPoints.size(); i++) {
+				this.mapOfCluster.put(this.listOfNewPoints.get(i), clusterId);
+				//Calcuate Fractal Dimension
+				//Compare it with the Original Fractal Dimension of the cluster.
+				//record the deference
+				//pick the point that that has the minimum Fractal Impact.
+				//check if the minimal impact is greater than threshold 
+				//if its greater than threshold
+				//eliminate the point as noice
+				//other wise leave the point in the cluster.
+			}
+		}
 	}
 	
 	/**
