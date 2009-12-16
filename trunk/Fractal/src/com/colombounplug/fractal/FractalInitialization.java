@@ -3,6 +3,10 @@
  */
 package com.colombounplug.fractal;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,11 +41,15 @@ public class FractalInitialization {
 	private double[] newPoints;
 	public ArrayList<Double> listOfNewPoints;
 	HashMap<Integer, Double> mapOfFractDimension;
+	HashMap<Integer, Double> originalFractDimension;
+	File outPut;
+	PrintStream ps;
 	
 	/**
 	 * Default constructor sets the threshold and handles necessary object creation.
+	 * @throws FileNotFoundException 
 	 */
-	public FractalInitialization () {
+	public FractalInitialization () throws FileNotFoundException {
 		
 		Random random = new Random(); 
 		this.distanceThreshold = random.nextInt(10) + 1;
@@ -67,6 +75,15 @@ public class FractalInitialization {
 			}
 		}
 		
+		if(newPoints.length != 0) {
+			for(int i = 0; i < newPoints.length; i++) {
+				listOfNewPoints.add(newPoints[i]);
+			}
+		}
+		
+		listOfNewPoints.add(203.5);
+		listOfNewPoints.add(0.00000005);
+		
 		Collections.sort(tempList);
 		lastValue = tempList.get(tempList.size()-1);
 		
@@ -78,6 +95,9 @@ public class FractalInitialization {
 		mapOfCluster = new HashMap<Double, Integer>();
 		tempCluster = new ArrayList<Double>();
 		mapOfFractDimension = new HashMap<Integer, Double>();
+		originalFractDimension = new HashMap<Integer, Double>();
+		outPut = new File("FractalOutput.csv");
+		ps = new PrintStream(new FileOutputStream(outPut));
 		
 	}
 	
@@ -166,7 +186,7 @@ public class FractalInitialization {
 	
 	/**
 	 * Given a point method returns an array with point that are within the limit of threshold.
-	 * @param point
+	 * @param point double value point to check if its within the threshold.
 	 * @return
 	 */
 	public double[] pointsWithinThreshold(double point) {
@@ -183,8 +203,11 @@ public class FractalInitialization {
 		return neighbors;
 	}
 	/**
-	 * Method will check if a point belongs to a cluster based on the dynamic 
-	 * threshold.
+	 * Method will do a recursive depth first search to check check if a 
+	 * point belongs to a cluster based on the dynamic threshold.<br>
+	 * Method also rest the threshold after each iteration.
+	 * 
+	 * @param point A double value point from a sample data set.
 	 */
 	public void dfsNearest(double point) {
 
@@ -250,35 +273,39 @@ public class FractalInitialization {
 			avgClusterDist =+ holder.pop();
 			//System.out.println(avgClusterDist);
 		}
-		System.out.println(avgClusterDist/cluster.size());
+		//System.out.println(avgClusterDist/cluster.size());
 		return avgClusterDist/cluster.size();
 	}
 
 	/**
 	 * Method calculate Fractal Dimension using box-counting.
 	 */
-	public void boxCounting() {
+	public void boxCounting(HashMap<Double, Integer> cluster) {
 		List<Double> keyList = new ArrayList<Double>();
 		Double range = 5.0;
 		double scale = this.lastValue / range;
 		int boxCount = 0;
-		int count = 0;
 		
+		//Get all the elements for each cluster ID and prepare a list 
+		//to use for box counting.
 		for(int i = 1; i <= this.numOfClusters; i++) {
 			if(!keyList.isEmpty())
 				keyList.removeAll(keyList);
 			System.out.println("Printing Cluster " + i);
-			count = 0;
+			ps.println("Printing Cluster " + i);
 			boxCount = 0;
-			for(Double key : mapOfCluster.keySet()) {
-				if(mapOfCluster.get(key).equals(i)) {
+			for(Double key : cluster.keySet()) {
+				if(cluster.get(key).equals(i)) {
 					keyList.add(key);
 					Collections.sort(keyList);
 					System.out.println(key);
+					ps.println(key);
 				}
 			
 			}
-
+			
+			//foreach range for points in each cluster check how many boxes are 
+			//needed to represent the cluster.
 			for(int rangeCount = 1; rangeCount < scale; rangeCount++) {
 				for (Double double1 : keyList) {
 					if((double1 < (range * rangeCount)) && (double1 > (rangeCount - 1) * range)) {
@@ -289,8 +316,11 @@ public class FractalInitialization {
 			}
 			
 			System.out.println("Cluster " + i + " require " + boxCount + " boxes");
+			ps.println("Cluster " + i + " require " + boxCount + " boxes");
 			double fractalDimension = Math.log(boxCount) / Math.log(scale);
 			System.out.println("Fractal Dimension of cluster " + i + " is " +fractalDimension);
+			ps.println("Fractal Dimension of cluster " + i + " is " +fractalDimension);
+			//might have to store this in a different map.
 			this.mapOfFractDimension.put(i, fractalDimension);
 
 		}
@@ -298,17 +328,32 @@ public class FractalInitialization {
 		//System.out.println("Scale is " + scale);
 	}
 	
+	//idea: create a method that can accpet cluster id, and the map return fd on that cluster.
 	public void newFractalDimension() {
+		this.originalFractDimension = (HashMap)this.mapOfFractDimension.clone();
 		for(int clusterId = 1; clusterId <= this.numOfClusters; clusterId++) {
 			for(int i = 0; i < this.listOfNewPoints.size(); i++) {
-				this.mapOfCluster.put(this.listOfNewPoints.get(i), clusterId);
+				double point = this.listOfNewPoints.get(i);
+				this.mapOfCluster.put(point, clusterId);
+				//calculating new fractal dimension
+				boxCounting(mapOfCluster);
+				System.out.println("Old FD " + this.originalFractDimension.get(clusterId));
+				ps.println("Old FD " + this.originalFractDimension.get(clusterId));
+				System.out.println("New FD " + this.mapOfFractDimension.get(clusterId));
+				ps.println("New FD " + this.mapOfFractDimension.get(clusterId));
+				double fdDifference = Math.abs(this.mapOfFractDimension.get(clusterId) - this.originalFractDimension.get(clusterId));
+				System.out.println("FD Difference " + fdDifference);
+				ps.println("FD Difference " + fdDifference);
+				if(fdDifference > this.initialDistanceThreshold) {
+					this.mapOfCluster.remove(point);
+				}
 				//Calcuate Fractal Dimension
 				//Compare it with the Original Fractal Dimension of the cluster.
 				//record the deference
 				//pick the point that that has the minimum Fractal Impact.
 				//check if the minimal impact is greater than threshold 
 				//if its greater than threshold
-				//eliminate the point as noice
+				//eliminate the point as noize
 				//other wise leave the point in the cluster.
 			}
 		}
@@ -346,7 +391,7 @@ public class FractalInitialization {
 	}
 	
 	
-	public static void main (String[] args) {
+	public static void main (String[] args) throws FileNotFoundException {
 		
 		FractalInitialization fractInt = new FractalInitialization();
 		boolean[] bool = new boolean[fractInt.tempList.size()];
@@ -358,18 +403,35 @@ public class FractalInitialization {
 				//System.out.println("whats in the cluster -> " + fractInt.cluster.get(i));
 		}	
 		
+		System.out.println("Cluster id and points");
+		fractInt.ps.println("Cluster id and points");
 		Set set = fractInt.mapOfCluster.entrySet();
-		Iterator iter = set.iterator();
-		
+		Iterator iter = set.iterator();	
 		while (iter.hasNext()) {
 			System.out.println(iter.next());
+			fractInt.ps.println(iter.next());
+			
 		}
 		
 		System.out.println("Number of clusters " + fractInt.getNumOfClusters());
+		fractInt.ps.println("Number of clusters " + fractInt.getNumOfClusters());
+		fractInt.boxCounting(fractInt.mapOfCluster);
+		//fractInt.originalFractDimension = fractInt.mapOfFractDimension;
 		
-		fractInt.boxCounting();
+		set = fractInt.originalFractDimension.entrySet();
+		iter = set.iterator();
+		System.out.println("Fractal Dimension calculation");
+		fractInt.ps.println("Fractal Dimension calculation");
+		while (iter.hasNext()) {
+			System.out.println(iter.next());
+			fractInt.ps.println(iter.next());
+		}	
+		
+		fractInt.newFractalDimension();
 		
 		System.out.println(fractInt.lastValue);
+		fractInt.ps.close();
+		
 	}	
 
 }
