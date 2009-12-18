@@ -59,7 +59,7 @@ public class FractalInitialization {
 		
 		initialDistanceThreshold = this.getDistanceThreshold();
 		bigCluster = combineArrays(generateClusters(1, 25), generateClusters(100, 125));
-		newPoints = combineArrays(generateClusters(25, 75), generateClusters(125, 150));
+		newPoints = combineArrays(generateClusters(5, 20), generateClusters(105, 120));
 		
 		tempList = new ArrayList<Double>();
 		cluster = new ArrayList<Double>();
@@ -98,6 +98,7 @@ public class FractalInitialization {
 		originalFractDimension = new HashMap<Integer, Double>();
 		outPut = new File("FractalOutput.csv");
 		ps = new PrintStream(new FileOutputStream(outPut));
+		ps.println(this.initialDistanceThreshold);
 		
 	}
 	
@@ -226,13 +227,16 @@ public class FractalInitialization {
 			cluster.add(newNeighbor);
 			mapOfCluster.put(newNeighbor, this.getNumOfClusters());
 			this.setDistanceThreshold(avgDistanceInCluster() * this.initialDistanceThreshold);
+			//ps.println("initial " + this.initialDistanceThreshold);
+			ps.println(getDistanceThreshold());
 			tempCluster.add(newNeighbor);
 			if (!visitedMap.containsKey(newNeighbor)) {
 				dfsNearest(newNeighbor);
-			}
+			}		
 		}
 		if(this.getDistanceThreshold() != this.initialDistanceThreshold) {
 			this.setDistanceThreshold(this.initialDistanceThreshold);
+			ps.println(getDistanceThreshold());
 		}
 	}
 
@@ -279,6 +283,16 @@ public class FractalInitialization {
 
 	/**
 	 * Method calculate Fractal Dimension using box-counting.
+	 * After calculating the original FD of cluster method will do following:
+	 * Calculate Fractal Dimension 
+	 * Compare it with the Original Fractal Dimension of the cluster.
+	 * Record the deference between Original FD and new FD
+	 * pick the point that that has the minimum Fractal Impact.
+	 * check if the minimal impact is greater than threshold 
+	 * if its greater than threshold
+	 * eliminate the point as noise 
+	 * other wise leave the point in the cluster.
+	 * @param cluster a hash map with elements in cluster and their ids.
 	 */
 	public void boxCounting(HashMap<Double, Integer> cluster) {
 		List<Double> keyList = new ArrayList<Double>();
@@ -347,14 +361,6 @@ public class FractalInitialization {
 				if(fdDifference > this.initialDistanceThreshold) {
 					this.mapOfCluster.remove(point);
 				}
-				//Calcuate Fractal Dimension
-				//Compare it with the Original Fractal Dimension of the cluster.
-				//record the deference
-				//pick the point that that has the minimum Fractal Impact.
-				//check if the minimal impact is greater than threshold 
-				//if its greater than threshold
-				//eliminate the point as noize
-				//other wise leave the point in the cluster.
 			}
 		}
 	}
