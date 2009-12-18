@@ -18,7 +18,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 
 /**
- * This class handles initialization process of clusters.
+ * This class handles initialization and incremental process of clusters.
  * @author anuradha.uduwage
  *
  */
@@ -171,20 +171,6 @@ public class FractalInitialization {
 		}
 	}
 	
-	public double[][] distanceGrid() {
-		double[] gridSize = combineArrays(generateClusters(1, 3), generateClusters(12, 15));
-		double [][] pointsDistanceGrid = new double[gridSize.length][gridSize.length];
-		for (int i = 0; i < pointsDistanceGrid.length; i++) {
-			for (int j = 0; j < pointsDistanceGrid[i].length; j++) {
-				pointsDistanceGrid[i][j] = Math.abs(gridSize[i] - gridSize[j] );
-				System.out.print(" " + pointsDistanceGrid[i][j]);
-			}
-			System.out.println("");
-		}
-
-		return pointsDistanceGrid;
-	}
-	
 	/**
 	 * Given a point method returns an array with point that are within the limit of threshold.
 	 * @param point double value point to check if its within the threshold.
@@ -237,23 +223,6 @@ public class FractalInitialization {
 		if(this.getDistanceThreshold() != this.initialDistanceThreshold) {
 			this.setDistanceThreshold(this.initialDistanceThreshold);
 			ps.println(getDistanceThreshold());
-		}
-	}
-
-	public void dfsNearestNeighbor(double point, ArrayList<Double> list, boolean[] pointIsVisited ) {
-		if (point != 0.0) {
-			list.add(point);
-			cluster.add(point);
-			pointIsVisited[(int) point] = true;
-			double newNeighbor =  nearestNeighbor(point);
-			if (newNeighbor !=  0.0) {
-				cluster.add(newNeighbor);
-				for (int i = 0; i < tempList.size(); i++) {
-					if (!pointIsVisited[i]) {
-						dfsNearestNeighbor(newNeighbor, list, pointIsVisited);
-					}
-				}
-			}
 		}
 	}
 	
@@ -338,11 +307,13 @@ public class FractalInitialization {
 			this.mapOfFractDimension.put(i, fractalDimension);
 
 		}
-		//System.out.println("Count is " + count + "&& tempCount is " + boxCount);
-		//System.out.println("Scale is " + scale);
 	}
 	
-	//idea: create a method that can accpet cluster id, and the map return fd on that cluster.
+	/**
+	 * Adding a new point to the each cluster and compare the FD with original to confirm 
+	 * if the point belongs to the cluster.
+	 * TODO: create a method that can accpet cluster id, and the map return fd on that cluster.
+	 */
 	public void newFractalDimension() {
 		this.originalFractDimension = (HashMap)this.mapOfFractDimension.clone();
 		for(int clusterId = 1; clusterId <= this.numOfClusters; clusterId++) {
