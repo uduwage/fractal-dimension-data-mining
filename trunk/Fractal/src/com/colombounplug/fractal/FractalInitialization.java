@@ -96,6 +96,8 @@ public class FractalInitialization {
 		tempCluster = new ArrayList<Double>();
 		mapOfFractDimension = new HashMap<Integer, Double>();
 		originalFractDimension = new HashMap<Integer, Double>();
+		
+		//Generate outputs to a file.
 		outPut = new File("FractalOutput.csv");
 		ps = new PrintStream(new FileOutputStream(outPut));
 		ps.println(this.initialDistanceThreshold);
@@ -142,7 +144,7 @@ public class FractalInitialization {
 			
 	/**
 	 * Find the nearest neighbor based on the distance threshold.
-	 * TODO:
+	 * 
 	 * @param currentPoint current point in the memory.
 	 * @param threshold dynamic distance threshold.
 	 * @return return the neighbor.
@@ -289,7 +291,7 @@ public class FractalInitialization {
 			
 			//foreach range for points in each cluster check how many boxes are 
 			//needed to represent the cluster.
-			for(int rangeCount = 1; rangeCount < scale; rangeCount++) {
+			for(int rangeCount = 0; rangeCount < scale + 1; rangeCount++) {
 				for (Double double1 : keyList) {
 					if((double1 < (range * rangeCount)) && (double1 > (rangeCount - 1) * range)) {
 						boxCount += 1;
@@ -305,6 +307,7 @@ public class FractalInitialization {
 			ps.println("Fractal Dimension of cluster " + i + " is " +fractalDimension);
 			//might have to store this in a different map.
 			this.mapOfFractDimension.put(i, fractalDimension);
+			System.out.println("Scale " + scale);
 
 		}
 	}
@@ -312,24 +315,34 @@ public class FractalInitialization {
 	/**
 	 * Adding a new point to the each cluster and compare the FD with original to confirm 
 	 * if the point belongs to the cluster.
-	 * TODO: create a method that can accpet cluster id, and the map return fd on that cluster.
+	 * TODO: create a method that can accept cluster id, and the map return fd on that cluster.
 	 */
 	public void newFractalDimension() {
+		
 		this.originalFractDimension = (HashMap)this.mapOfFractDimension.clone();
-		for(int clusterId = 1; clusterId <= this.numOfClusters; clusterId++) {
-			for(int i = 0; i < this.listOfNewPoints.size(); i++) {
+
+		for(int i = 0; i < this.listOfNewPoints.size(); i++) {
+			for(int clusterId = 1; clusterId <= this.numOfClusters; clusterId++) {
 				double point = this.listOfNewPoints.get(i);
 				this.mapOfCluster.put(point, clusterId);
+				
 				//calculating new fractal dimension
 				boxCounting(mapOfCluster);
+				
 				System.out.println("Old FD " + this.originalFractDimension.get(clusterId));
 				ps.println("Old FD " + this.originalFractDimension.get(clusterId));
 				System.out.println("New FD " + this.mapOfFractDimension.get(clusterId));
 				ps.println("New FD " + this.mapOfFractDimension.get(clusterId));
-				double fdDifference = Math.abs(this.mapOfFractDimension.get(clusterId) - this.originalFractDimension.get(clusterId));
+				
+				double fdDifference = Math.abs(this.mapOfFractDimension.get(clusterId) - 
+												this.originalFractDimension.get(clusterId));
 				System.out.println("FD Difference " + fdDifference);
 				ps.println("FD Difference " + fdDifference);
-				if(fdDifference > this.initialDistanceThreshold) {
+				
+				double tenPecent = (this.originalFractDimension.get(clusterId) / 100) * 10;
+				System.out.println("Old D "  + this.originalFractDimension.get(clusterId));
+				System.out.println("Ten Percent " + tenPecent);
+				if(fdDifference > tenPecent) {
 					this.mapOfCluster.remove(point);
 				}
 			}
@@ -381,32 +394,36 @@ public class FractalInitialization {
 		}	
 		
 		System.out.println("Cluster id and points");
-		fractInt.ps.println("Cluster id and points");
+		//fractInt.ps.println("Cluster id and points");
+		/*
 		Set set = fractInt.mapOfCluster.entrySet();
-		Iterator iter = set.iterator();	
+		Iterator iter = set.iterator();	*/
+		/*
 		while (iter.hasNext()) {
 			System.out.println(iter.next());
-			fractInt.ps.println(iter.next());
+			//fractInt.ps.println(iter.next());
 			
-		}
+		}*/
 		
 		System.out.println("Number of clusters " + fractInt.getNumOfClusters());
 		fractInt.ps.println("Number of clusters " + fractInt.getNumOfClusters());
 		fractInt.boxCounting(fractInt.mapOfCluster);
 		//fractInt.originalFractDimension = fractInt.mapOfFractDimension;
 		
+		/*
 		set = fractInt.originalFractDimension.entrySet();
 		iter = set.iterator();
-		System.out.println("Fractal Dimension calculation");
-		fractInt.ps.println("Fractal Dimension calculation");
+		System.out.println("Fractal Dimension calculation"); */
+		//fractInt.ps.println("Fractal Dimension calculation");
+		/*
 		while (iter.hasNext()) {
-			System.out.println(iter.next());
-			fractInt.ps.println(iter.next());
-		}	
+			//System.out.println(iter.next());
+			//fractInt.ps.println(iter.next());
+		}	*/
 		
 		fractInt.newFractalDimension();
-		
-		System.out.println(fractInt.lastValue);
+
+		//System.out.println(fractInt.lastValue);
 		fractInt.ps.close();
 		
 	}	
