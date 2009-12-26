@@ -58,13 +58,12 @@ public class FractalInitialization {
 		//this.setDistanceThreshold(15.4564);
 		
 		initialDistanceThreshold = this.getDistanceThreshold();
-		bigCluster = combineArrays(generateClusters(1, 25), generateClusters(100, 125));
+		bigCluster = combineArrays(generateClusters(1, 50), generateClusters(150, 200));
 		newPoints = combineArrays(generateClusters(5, 20), generateClusters(105, 120));
 		
 		tempList = new ArrayList<Double>();
 		cluster = new ArrayList<Double>();
 		listOfNewPoints = new ArrayList<Double>();
-		
 		
 		cluster.clear();
 		
@@ -98,7 +97,7 @@ public class FractalInitialization {
 		originalFractDimension = new HashMap<Integer, Double>();
 		
 		//Generate outputs to a file.
-		outPut = new File("FractalOutput.csv");
+		outPut = new File("FractalIncremental-2.csv");
 		ps = new PrintStream(new FileOutputStream(outPut));
 		ps.println(this.initialDistanceThreshold);
 		
@@ -201,6 +200,7 @@ public class FractalInitialization {
 	public void dfsNearest(double point) {
 
 		double aPointInCluster = point;
+		
 		if(!cluster.contains(aPointInCluster)) {
 			cluster.add(aPointInCluster);
 			this.setNumOfClusters(this.getNumOfClusters() + 1);
@@ -215,8 +215,6 @@ public class FractalInitialization {
 			cluster.add(newNeighbor);
 			mapOfCluster.put(newNeighbor, this.getNumOfClusters());
 			this.setDistanceThreshold(avgDistanceInCluster() * this.initialDistanceThreshold);
-			//ps.println("initial " + this.initialDistanceThreshold);
-			ps.println(getDistanceThreshold());
 			tempCluster.add(newNeighbor);
 			if (!visitedMap.containsKey(newNeighbor)) {
 				dfsNearest(newNeighbor);
@@ -224,7 +222,6 @@ public class FractalInitialization {
 		}
 		if(this.getDistanceThreshold() != this.initialDistanceThreshold) {
 			this.setDistanceThreshold(this.initialDistanceThreshold);
-			ps.println(getDistanceThreshold());
 		}
 	}
 	
@@ -308,7 +305,29 @@ public class FractalInitialization {
 			//might have to store this in a different map.
 			this.mapOfFractDimension.put(i, fractalDimension);
 			System.out.println("Scale " + scale);
+			System.out.println("DT " + this.initialDistanceThreshold);
 
+		}
+	}
+	
+	public void printCluster(HashMap<Double, Integer> cluster) {
+		List<Double> keys = new ArrayList<Double>();
+		
+		for(int i = 1; i <= this.numOfClusters; i++) {
+			if(!keys.isEmpty())
+				keys.removeAll(keys);
+			//System.out.println("Printing new Cluster " + i);
+			ps.println("Printing Cluster " + i);
+		
+			for(Double key : cluster.keySet()) {
+				if(cluster.get(key).equals(i)) {
+					keys.add(key);
+					Collections.sort(keys);
+					//System.out.println(key);
+					ps.println(key);
+				}
+			
+			}
 		}
 	}
 	
@@ -330,14 +349,14 @@ public class FractalInitialization {
 				boxCounting(mapOfCluster);
 				
 				System.out.println("Old FD " + this.originalFractDimension.get(clusterId));
-				ps.println("Old FD " + this.originalFractDimension.get(clusterId));
+				//ps.println("Old FD " + this.originalFractDimension.get(clusterId));
 				System.out.println("New FD " + this.mapOfFractDimension.get(clusterId));
-				ps.println("New FD " + this.mapOfFractDimension.get(clusterId));
+				//ps.println("New FD " + this.mapOfFractDimension.get(clusterId));
 				
 				double fdDifference = Math.abs(this.mapOfFractDimension.get(clusterId) - 
 												this.originalFractDimension.get(clusterId));
 				System.out.println("FD Difference " + fdDifference);
-				ps.println("FD Difference " + fdDifference);
+				//ps.println("FD Difference " + fdDifference);
 				
 				double tenPecent = (this.originalFractDimension.get(clusterId) / 100) * 10;
 				System.out.println("Old D "  + this.originalFractDimension.get(clusterId));
@@ -422,8 +441,10 @@ public class FractalInitialization {
 		}	*/
 		
 		fractInt.newFractalDimension();
+		
+		fractInt.printCluster(fractInt.mapOfCluster);
 
-		//System.out.println(fractInt.lastValue);
+		fractInt.ps.println("Initial DT " + fractInt.initialDistanceThreshold);
 		fractInt.ps.close();
 		
 	}	
